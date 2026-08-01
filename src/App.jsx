@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Sun, Wind, RefreshCw, Volume2, VolumeX, Sparkles, AlertTriangle, 
-  MapPin, Droplets, Sunrise, Sunset 
+  MapPin, Droplets, Sunrise, Sunset, Calendar, Clock, Compass, Eye, ShieldAlert 
 } from 'lucide-react';
 
 export default function App() {
@@ -12,6 +12,7 @@ export default function App() {
   const [error, setError] = useState(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(false);
+  const [selectedDayIndex, setSelectedDayIndex] = useState(0);
 
   const fetchWeather = async (cityName) => {
     setLoading(true);
@@ -24,10 +25,45 @@ export default function App() {
         throw new Error('Nie znaleziono takiego miasta!');
       }
 
-      const { latitude, longitude, name, country } = geoData.results[0];
+      const { latitude, longitude, name, country, timezone } = geoData.results[0];
 
-      const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=sunrise,sunset&timezone=auto`);
+      const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,surface_pressure&hourly=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max&timezone=auto`);
       const weatherJson = await weatherRes.json();
+
+      // Przetwarzanie 7 dni
+      const days = weatherJson.daily.time.map((dateStr, idx) => {
+        const d = new Date(dateStr);
+        const dayName = idx === 0 ? 'Dzisiaj' : d.toLocaleDateString('pl-PL', { weekday: 'short', day: 'numeric', month: 'numeric' });
+        
+        // Wyciąganie godzin dla tego dnia (24 godziny na dobę)
+        const startHourIdx = idx * 24;
+        const hourlyForDay = [];
+        for (let h = 0; h < 24; h++) {
+          const globalHIdx = startHourIdx + h;
+          if (weatherJson.hourly && weatherJson.hourly.time[globalHIdx]) {
+            const timeString = weatherJson.hourly.time[globalHIdx].split('T')[1];
+            hourlyForDay.push({
+              time: timeString,
+              temp: weatherJson.hourly.temperature_2m[globalHIdx],
+              humidity: weatherJson.hourly.relative_humidity_2m[globalHIdx],
+              wind: weatherJson.hourly.wind_speed_10m[globalHIdx],
+              code: weatherJson.hourly.weather_code[globalHIdx],
+              uv: weatherJson.hourly.uv_index ? weatherJson.hourly.uv_index[globalHIdx] : 0
+            });
+          }
+        }
+
+        return {
+          date: dayName,
+          maxTemp: weatherJson.daily.temperature_2m_max[idx],
+          minTemp: weatherJson.daily.temperature_2m_min[idx],
+          code: weatherJson.daily.weather_code[idx],
+          sunrise: weatherJson.daily.sunrise[idx].split('T')[1],
+          sunset: weatherJson.daily.sunset[idx].split('T')[1],
+          uvMax: weatherJson.daily.uv_index_max ? weatherJson.daily.uv_index_max[idx] : 5,
+          hourly: hourlyForDay
+        };
+      });
 
       setWeatherData({
         name: `${name}, ${country || ''}`,
@@ -35,10 +71,13 @@ export default function App() {
         feelsLike: weatherJson.current.apparent_temperature,
         humidity: weatherJson.current.relative_humidity_2m,
         wind: weatherJson.current.wind_speed_10m,
+        pressure: weatherJson.current.surface_pressure,
         code: weatherJson.current.weather_code,
-        sunrise: weatherJson.daily.sunrise[0].split('T')[1],
-        sunset: weatherJson.daily.sunset[0].split('T')[1],
+        lat: latitude,
+        lon: longitude,
+        days: days
       });
+      setSelectedDayIndex(0);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -65,7 +104,7 @@ export default function App() {
         setIsSpeaking(false);
         return;
       }
-      const text = `Aktualna pogoda dla miasta ${weatherData.name}. Temperatura wynosi ${weatherData.temp} stopni.`;
+      const text = `Prognoza dla miasta ${weatherData.name}. Temperatura wynosi ${weatherData.temp} stopni.`;
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'pl-PL';
       utterance.onend = () => setIsSpeaking(false);
@@ -73,143 +112,4 @@ export default function App() {
       setIsSpeaking(true);
     }
   };
-
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center p-4">
-      <header className="w-full max-w-md flex items-center justify-between py-4 mb-2">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-6 h-6 text-cyan-400 animate-pulse" />
-          <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent">
-            GeminiWeather 3D
-          </h1>
-        </div>
-        <button 
-          onClick={() => setSoundEnabled(!soundEnabled)}
-          className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300"
-        >
-          {soundEnabled ? <Volume2 className="w-5 h-5 text-cyan-400" /> : <VolumeX className="w-5 h-5 text-slate-500" />}
-        </button>
-      </header>
-
-      <form onSubmit={handleSearch} className="w-full max-w-md flex gap-2 mb-6">
-        <div className="relative flex-1">
-          <MapPin className="absolute left-3 top-3.5 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Wpisz miasto..."
-            className="w-full bg-slate-900 border border-slate-800 rounded-2xl pl-10 pr-4 py-3 text-sm text-slate-100"
-          />
-        </div>
-        <button
-          type="submit"
-          className="bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg"
-        >
-          Szukaj
-        </button>
-      </form>
-            <main className="w-full max-w-md flex-1 flex flex-col gap-4 pb-6">
-        {loading && (
-          <div className="flex-1 flex flex-col items-center justify-center py-20 text-slate-400">
-            <RefreshCw className="w-8 h-8 animate-spin text-cyan-400 mb-2" />
-            <p className="text-sm">Pobieranie danych...</p>
-          </div>
-        )}
-
-        {error && (
-          <div className="p-4 rounded-2xl bg-red-950/40 border border-red-900/50 text-red-300 flex items-center gap-3">
-            <AlertTriangle className="w-5 h-5 shrink-0" />
-            <p className="text-sm">{error}</p>
-          </div>
-        )}
-
-        {!loading && !error && weatherData && (
-          <>
-            <div className="relative w-full h-64 rounded-3xl bg-gradient-to-b from-slate-900 to-indigo-950/40 p-6 border border-slate-800/80 flex flex-col justify-between">
-              <div className="relative z-10 text-center my-auto">
-                <div className="inline-flex p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 mb-3">
-                  <Sun className="w-12 h-12 text-cyan-400" />
-                </div>
-                <h2 className="text-2xl font-bold">{weatherData.name}</h2>
-                <p className="text-4xl font-extrabold mt-1 text-cyan-300">{weatherData.temp}°C</p>
-                <p className="text-xs text-slate-400 mt-1">Odczuwalna: {weatherData.feelsLike}°C</p>
-              </div>
-
-              <button
-                onClick={speakSummary}
-                className="relative z-10 w-full py-2.5 px-4 bg-slate-900/80 border border-slate-700/50 rounded-xl text-xs text-slate-200 flex items-center justify-center gap-2"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                {isSpeaking ? 'Zatrzymaj głos' : 'AI Asystent – Odczytaj pogodę'}
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-slate-900/60 border border-slate-800/80 p-4 rounded-2xl flex items-center gap-3">
-                <Droplets className="w-5 h-5 text-blue-400" />
-                <div>
-                  <p className="text-xs text-slate-400">Wilgotność</p>
-                  <p className="text-sm font-semibold">{weatherData.humidity}%</p>
-                </div>
-              </div>
-
-              <div className="bg-slate-900/60 border border-slate-800/80 p-4 rounded-2xl flex items-center gap-3">
-                <Wind className="w-5 h-5 text-cyan-400" />
-                <div>
-                  <p className="text-xs text-slate-400">Wiatr</p>
-                  <p className="text-sm font-semibold">{weatherData.wind} km/h</p>
-                </div>
-              </div>
-
-              <div className="bg-slate-900/60 border border-slate-800/80 p-4 rounded-2xl flex items-center gap-3">
-                <Sunrise className="w-5 h-5 text-amber-400" />
-                <div>
-                  <p className="text-xs text-slate-400">Wschód słońca</p>
-                  <p className="text-sm font-semibold">{weatherData.sunrise}</p>
-                </div>
-              </div>
-
-              <div className="bg-slate-900/60 border border-slate-800/80 p-4 rounded-2xl flex items-center gap-3">
-                <Sunset className="w-5 h-5 text-indigo-400" />
-                <div>
-                  <p className="text-xs text-slate-400">Zachód słońca</p>
-                  <p className="text-sm font-semibold">{weatherData.sunset}</p>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-      </main>
-
-      <section className="w-full max-w-md mt-6 p-5 bg-slate-900/60 rounded-2xl border border-slate-800/80 text-slate-300 text-sm space-y-3 text-left">
-        <h2 className="text-base font-semibold text-slate-100 flex items-center gap-2">
-          <span>🌐</span> O GeminiWeather 3D
-        </h2>
-        <p className="text-xs text-slate-400 leading-relaxed">
-          GeminiWeather 3D to interaktywna aplikacja pogodowa łącząca precyzyjne dane meteorologiczne z analizą AI.
-        </p>
-        <div className="pt-2 border-t border-slate-800/60 grid grid-cols-2 gap-3 text-xs">
-          <div>
-            <span className="font-medium text-slate-200 block">⚡ Szybka analiza</span>
-            <span className="text-slate-400">Temperatura i wiatr.</span>
-          </div>
-          <div>
-            <span className="font-medium text-slate-200 block">🤖 Asystent AI</span>
-            <span className="text-slate-400">Rekomendacje pogodowe.</span>
-          </div>
-        </div>
-      </section>
-
-      <footer className="w-full max-w-md mt-8 py-6 border-t border-slate-800 text-center text-xs text-slate-500 flex flex-col gap-2">
-        <p>© 2026 GeminiWeather 3D. Wszystkie prawa zastrzeżone.</p>
-        <div className="flex justify-center gap-4 text-slate-400">
-          <a href="#about" className="hover:underline">O aplikacji</a>
-          <span>•</span>
-          <a href="#privacy" className="hover:underline">Polityka Prywatności</a>
-        </div>
-      </footer>
-    </div>
-  );
-}
-
+  
