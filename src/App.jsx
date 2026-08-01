@@ -109,4 +109,107 @@ export default function App() {
           Szukaj
         </button>
       </form>
-      
+            <main className="w-full max-w-md flex-1 flex flex-col gap-4 pb-6">
+        {loading && (
+          <div className="flex-1 flex flex-col items-center justify-center py-20 text-slate-400">
+            <RefreshCw className="w-8 h-8 animate-spin text-cyan-400 mb-2" />
+            <p className="text-sm">Pobieranie danych...</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="p-4 rounded-2xl bg-red-950/40 border border-red-900/50 text-red-300 flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 shrink-0" />
+            <p className="text-sm">{error}</p>
+          </div>
+        )}
+
+        {!loading && !error && weatherData && (
+          <>
+            <div className="relative w-full h-64 rounded-3xl bg-gradient-to-b from-slate-900 to-indigo-950/40 p-6 border border-slate-800/80 flex flex-col justify-between">
+              <div className="relative z-10 text-center my-auto">
+                <div className="inline-flex p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 mb-3">
+                  <Sun className="w-12 h-12 text-cyan-400" />
+                </div>
+                <h2 className="text-2xl font-bold">{weatherData.name}</h2>
+                <p className="text-4xl font-extrabold mt-1 text-cyan-300">{weatherData.temp}°C</p>
+                <p className="text-xs text-slate-400 mt-1">Odczuwalna: {weatherData.feelsLike}°C</p>
+              </div>
+
+              <button
+                onClick={speakSummary}
+                className="relative z-10 w-full py-2.5 px-4 bg-slate-900/80 border border-slate-700/50 rounded-xl text-xs text-slate-200 flex items-center justify-center gap-2"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                {isSpeaking ? 'Zatrzymaj głos' : 'AI Asystent – Odczytaj pogodę'}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-slate-900/60 border border-slate-800/80 p-4 rounded-2xl flex items-center gap-3">
+                <Droplets className="w-5 h-5 text-blue-400" />
+                <div>
+                  <p className="text-xs text-slate-400">Wilgotność</p>
+                  <p className="text-sm font-semibold">{weatherData.humidity}%</p>
+                </div>
+              </div>
+
+              <div className="bg-slate-900/60 border border-slate-800/80 p-4 rounded-2xl flex items-center gap-3">
+                <Wind className="w-5 h-5 text-cyan-400" />
+                <div>
+                  <p className="text-xs text-slate-400">Wiatr</p>
+                  <p className="text-sm font-semibold">{weatherData.wind} km/h</p>
+                </div>
+              </div>
+
+              <div className="bg-slate-900/60 border border-slate-800/80 p-4 rounded-2xl flex items-center gap-3">
+                <Sunrise className="w-5 h-5 text-amber-400" />
+                <div>
+                  <p className="text-xs text-slate-400">Wschód słońca</p>
+                  <p className="text-sm font-semibold">{weatherData.sunrise}</p>
+                </div>
+              </div>
+
+              <div className="bg-slate-900/60 border border-slate-800/80 p-4 rounded-2xl flex items-center gap-3">
+                <Sunset className="w-5 h-5 text-indigo-400" />
+                <div>
+                  <p className="text-xs text-slate-400">Zachód słońca</p>
+                  <p className="text-sm font-semibold">{weatherData.sunset}</p>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+      </main>
+
+      <section className="w-full max-w-md mt-6 p-5 bg-slate-900/60 rounded-2xl border border-slate-800/80 text-slate-300 text-sm space-y-3 text-left">
+        <h2 className="text-base font-semibold text-slate-100 flex items-center gap-2">
+          <span>🌐</span> O GeminiWeather 3D
+        </h2>
+        <p className="text-xs text-slate-400 leading-relaxed">
+          GeminiWeather 3D to interaktywna aplikacja pogodowa łącząca precyzyjne dane meteorologiczne z analizą AI.
+        </p>
+        <div className="pt-2 border-t border-slate-800/60 grid grid-cols-2 gap-3 text-xs">
+          <div>
+            <span className="font-medium text-slate-200 block">⚡ Szybka analiza</span>
+            <span className="text-slate-400">Temperatura i wiatr.</span>
+          </div>
+          <div>
+            <span className="font-medium text-slate-200 block">🤖 Asystent AI</span>
+            <span className="text-slate-400">Rekomendacje pogodowe.</span>
+          </div>
+        </div>
+      </section>
+
+      <footer className="w-full max-w-md mt-8 py-6 border-t border-slate-800 text-center text-xs text-slate-500 flex flex-col gap-2">
+        <p>© 2026 GeminiWeather 3D. Wszystkie prawa zastrzeżone.</p>
+        <div className="flex justify-center gap-4 text-slate-400">
+          <a href="#about" className="hover:underline">O aplikacji</a>
+          <span>•</span>
+          <a href="#privacy" className="hover:underline">Polityka Prywatności</a>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
