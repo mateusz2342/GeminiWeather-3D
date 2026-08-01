@@ -198,29 +198,8 @@ export default function App() {
             </div>
           </>
         )}
-      </main>    </main>
-
-    {/* TUTAJ DOKŁADNIE WKLEJASZ TEN KOD: */}
-    <section className="w-full max-w-md mt-8 p-5 bg-slate-900/60 rounded-2xl border border-slate-800/80 text-slate-300 text-sm space-y-3 text-left">
-      <h2 className="text-base font-semibold text-slate-100 flex items-center gap-2">
-        <span>🌐</span> O GeminiWeather 3D
-      </h2>
-      <p className="text-xs text-slate-400 leading-relaxed">
-        GeminiWeather 3D to interaktywna aplikacja pogodowa łącząca precyzyjne dane meteorologiczne w czasie rzeczywistym z analizą sztucznej inteligencji.
-      </p>
-      <div className="pt-2 border-t border-slate-800/60 grid grid-cols-2 gap-3 text-xs">
-        <div>
-          <span className="font-medium text-slate-200 block">⚡ Szybka analiza</span>
-          <span className="text-slate-400">Pomiary temperatury, wiatru i wilgotności.</span>
-        </div>
-        <div>
-          <span className="font-medium text-slate-200 block">🤖 Asystent AI</span>
-          <span className="text-slate-400">Rekomendacje dotyczące ubioru i aktywności.</span>
-        </div>
-      </div>
-    </section>
-
-    <footer className="w-full max-w-md mt-12 py-6 border-t border-slate-800 text-center text-xs text-slate-500 flex flex-col gap-2">
+      </main> 
+  <footer className="w-full max-w-md mt-12 py-6 border-t border-slate-800 text-center text-xs text-slate-500 flex flex-col gap-2">
       <p>© 2026 GeminiWeather 3D. Wszystkie prawa zastrzeżone.</p>
       <div className="flex justify-center gap-4 text-slate-400">
         <a href="#about" className="hover:underline">O aplikacji</a>
