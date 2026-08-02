@@ -1,14 +1,56 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="pl">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="google-site-verification" content="Q4aNFYehBmlJHDWGy9JutOHf5eDCMUqrMjQdD2EtgS0" /><title>3D Weather Visualizer</title>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9797923252251392"
-     crossorigin="anonymous"></script>
+    
+    <title>Gemini Weather 3D - Precyzyjna Prognoza Pogody</title>
+    <meta name="description" content="Nowoczesna, interaktywna aplikacja pogodowa 3D. Sprawdzaj aktualną temperaturę, opady, jakość powietrza oraz wskaźnik UV w Twoim mieście." />
+
+    <!-- Google Analytics (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FLDMBD6T27"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-FLDMBD6T27');
+    </script>
+
+    <!-- Google AdSense Script -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6448107779774649" crossorigin="anonymous"></script>
   </head>
-  <body class="bg-slate-950">
+  <body>
+    <!-- Aplikacja React -->
     <div id="root"></div>
+
+    <!-- Sekcja informacyjna i prawna (Wymóg dla Google AdSense) -->
+    <footer style="max-width: 900px; margin: 40px auto; padding: 20px; font-family: sans-serif; color: #4a5568; line-height: 1.6; border-top: 1px solid #e2e8f0;">
+      
+      <section style="margin-bottom: 30px;">
+        <h2 style="color: #2d3748; font-size: 1.5rem; margin-bottom: 10px;">O aplikacji Gemini Weather 3D</h2>
+        <p>Gemini Weather 3D to nowoczesna aplikacja internetowa dostarczająca precyzyjne prognozy pogody dla miast na całym świecie. Dzięki zaawansowanym wizualizacjom 3D i dokładnym danym meteorologicznym, możesz śledzić warunki atmosferyczne, opady, prędkość wiatru oraz wskaźniki jakości powietrza w czasie rzeczywistym.</p>
+      </section>
+
+      <section style="margin-bottom: 30px;">
+        <h2 style="color: #2d3748; font-size: 1.5rem; margin-bottom: 10px;">Często Zadawane Pytania (FAQ)</h2>
+        <div style="margin-bottom: 15px;">
+          <strong>Jak odczytywać wskaźnik UV?</strong>
+          <p style="margin-top: 5px;">Wskaźnik UV określa poziom promieniowania ultrafioletowego. Wartości od 0 do 2 oznaczają niskie zagrożenie, natomiast powyżej 6 zaleca się stosowanie filtrów przeciwsłonecznych i ochronę oczu.</p>
+        </div>
+        <div style="margin-bottom: 15px;">
+          <strong>Skąd pochodzą dane o pogodzie?</strong>
+          <p style="margin-top: 5px;">Aplikacja wykorzystuje globalne stacje meteorologiczne oraz numeryczne modele prognozy pogody, zapewniając wysoką dokładność odczytów temperatury i ciśnienia.</p>
+        </div>
+      </section>
+
+      <section style="margin-top: 40px; padding-top: 20px; border-top: 1px dashed #cbd5e0; font-size: 0.9rem; text-align: center;">
+        <p><strong>Polityka Prywatności & Cookies:</strong> Serwis Gemini Weather 3D korzysta z plików cookies w celu analizy ruchu (Google Analytics) oraz wyświetlania spersonalizowanych reklam (Google AdSense). Korzystając ze strony, wyrażasz zgodę na ich używanie zgodnie z ustawieniami Twojej przeglądarki.</p>
+        <p style="margin-top: 10px; color: #a0aec0;">&copy; 2026 Gemini Weather 3D. Wszelkie prawa zastrzeżone.</p>
+      </section>
+
+    </footer>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
