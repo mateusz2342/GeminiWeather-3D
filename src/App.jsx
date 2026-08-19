@@ -76,4 +76,65 @@ export default function App() {
   const active = selectedDayIndex === 0 
     ? { h: weatherData?.humidity, w: weatherData?.wind, p: weatherData?.pressure }
     : { h: hourlyData?.humidity, w: hourlyData?.wind, p: hourlyData?.pressure };
-  
+    return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-4">
+      <div className="max-w-md mx-auto space-y-4">
+        <form onSubmit={(e) => { e.preventDefault(); setCity(searchInput); }} className="flex gap-2">
+          <input type="text" value={searchInput} onChange={(e) => setSearchInput(e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-100" />
+          <button type="submit" className="bg-cyan-600 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-cyan-500">Szukaj</button>
+        </form>
+
+        {loading && <div className="text-center py-10"><RefreshCw className="animate-spin w-8 h-8 mx-auto text-cyan-400" /></div>}
+        {error && <div className="p-4 bg-red-900/50 rounded-xl text-red-200">{error}</div>}
+
+        {weatherData && (
+          <>
+            <div className="bg-slate-900 p-6 rounded-3xl text-center border border-slate-800 shadow-xl">
+              <Sun className="w-12 h-12 mx-auto text-cyan-400 mb-2" />
+              <h2 className="text-xl font-bold">{weatherData.name}</h2>
+              <p className="text-4xl font-extrabold text-cyan-400 my-2">{selectedDayIndex === 0 ? weatherData.temp : currentDay.maxTemp}°C</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 flex items-center gap-3">
+                <Droplets className="text-blue-400" />
+                <div><p className="text-[10px] text-slate-400">Wilgotność</p><p className="font-semibold">{active.h}%</p></div>
+              </div>
+              <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 flex items-center gap-3">
+                <Wind className="text-cyan-400" />
+                <div><p className="text-[10px] text-slate-400">Wiatr</p><p className="font-semibold">{active.w} km/h</p></div>
+              </div>
+              <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 flex items-center gap-3">
+                <Compass className="text-emerald-400" />
+                <div><p className="text-[10px] text-slate-400">Ciśnienie</p><p className="font-semibold">{active.p ? active.p.toFixed(1) : '--'} hPa</p></div>
+              </div>
+              <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 flex items-center gap-3">
+                <ShieldAlert className="text-amber-400" />
+                <div><p className="text-[10px] text-slate-400">UV Max</p><p className="font-semibold">{currentDay.uvMax}</p></div>
+              </div>
+            </div>
+
+            <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {weatherData.days.map((day, idx) => (
+                  <button key={idx} onClick={() => setSelectedDayIndex(idx)} className={`p-3 rounded-xl min-w-[75px] border ${selectedDayIndex === idx ? 'bg-cyan-500/20 border-cyan-500' : 'bg-slate-900 border-slate-800'}`}>
+                    <span className="text-xs">{day.date}</span>
+                    <p className="font-bold">{day.maxTemp}°</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+              <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">Radar Pogodowy</h3>
+              <div className="aspect-video w-full rounded-xl overflow-hidden border border-slate-800">
+                <iframe title="Radar" src={`https://www.rainviewer.com/map.html?loc=${weatherData.lat},${weatherData.lon},7&o8=1&c=1&o=0&m=0&g=0`} className="w-full h-full" />
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
