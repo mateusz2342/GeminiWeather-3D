@@ -194,4 +194,116 @@ export default function App() {
   const activeWind = selectedDayIndex === 0 ? weatherData?.wind : hourlyMid?.wind;
   const activePressure = selectedDayIndex === 0 ? weatherData?.pressure : hourlyMid?.pressure;
   const activeCode = selectedDayIndex === 0 ? weatherData?.code : currentDay?.code;
-  
+    return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col p-4">
+      <header className="w-full max-w-md mx-auto flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-6 h-6 text-cyan-400 animate-pulse" />
+          <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">GeminiWeather 3D</h1>
+        </div>
+      </header>
+
+      <form onSubmit={handleSearch} className="w-full max-w-md mx-auto flex gap-2 mb-4">
+        <input type="text" value={searchInput} onChange={(e) => setSearchInput(e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-100" placeholder="Wpisz miasto..." />
+        <button type="submit" className="bg-cyan-600 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-cyan-500">Szukaj</button>
+      </form>
+
+      <main className="w-full max-w-md mx-auto flex-1 flex flex-col gap-4">
+        {loading && <div className="text-center py-10"><RefreshCw className="animate-spin w-8 h-8 mx-auto text-cyan-400" /></div>}
+        {error && <div className="p-4 bg-red-900/50 rounded-xl text-red-200">{error}</div>}
+
+        {!loading && !error && weatherData && (
+          <>
+            <div className="relative w-full rounded-3xl bg-slate-900 border border-slate-800 p-6 text-center shadow-xl">
+              <div className="mb-2">{getWeatherIcon(activeCode)}</div>
+              <h2 className="text-2xl font-bold">{weatherData.name}</h2>
+              <p className="text-4xl font-extrabold text-cyan-400 my-2">{selectedDayIndex === 0 ? weatherData.temp : currentDay.maxTemp}°C</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 flex items-center gap-3">
+                <Droplets className="text-blue-400 w-5 h-5" />
+                <div><p className="text-[10px] text-slate-400">Wilgotność</p><p className="font-semibold text-sm">{activeHumidity !== undefined ? activeHumidity : '--'}%</p></div>
+              </div>
+              <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 flex items-center gap-3">
+                <Wind className="text-cyan-400 w-5 h-5" />
+                <div><p className="text-[10px] text-slate-400">Wiatr</p><p className="font-semibold text-sm">{activeWind !== undefined ? activeWind : '--'} km/h</p></div>
+              </div>
+              <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 flex items-center gap-3">
+                <Compass className="text-emerald-400 w-5 h-5" />
+                <div><p className="text-[10px] text-slate-400">Ciśnienie</p><p className="font-semibold text-sm">{activePressure ? activePressure.toFixed(1) : '--'} hPa</p></div>
+              </div>
+              <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 flex items-center gap-3">
+                <ShieldAlert className="text-amber-400 w-5 h-5" />
+                <div><p className="text-[10px] text-slate-400">UV Max</p><p className="font-semibold text-sm">{currentDay ? currentDay.uvMax : '--'}</p></div>
+              </div>
+            </div>
+
+            <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+              <p className="text-xs text-slate-400 mb-2">Prognoza na 7 dni</p>
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {weatherData.days.map((day, idx) => (
+                  <button key={idx} onClick={() => setSelectedDayIndex(idx)} className={`p-3 rounded-xl min-w-[80px] flex flex-col items-center border ${selectedDayIndex === idx ? 'bg-cyan-500/20 border-cyan-500' : 'bg-slate-900 border-slate-800'}`}>
+                    <span className="text-xs mb-1">{day.date}</span>
+                    {getWeatherIcon(day.code)}
+                    <p className="font-bold text-sm mt-1">{day.maxTemp}°</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {currentDay && currentDay.hourly && (
+              <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+                <p className="text-xs text-slate-400 mb-2">Prognoza godzinowa ({currentDay.date})</p>
+                <div className="flex gap-3 overflow-x-auto pb-1">
+                  {currentDay.hourly.map((hour, idx) => (
+                    <div key={idx} className="flex flex-col items-center min-w-[50px] bg-slate-900/80 p-2 rounded-lg border border-slate-800 text-center">
+                      <span className="text-[10px] text-slate-400">{hour.time}</span>
+                      <div className="my-1 scale-75">{getWeatherIcon(hour.code)}</div>
+                      <span className="text-xs font-bold">{hour.temp}°</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+              <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">Radar Pogodowy Na Żywo</h3>
+              <div className="aspect-video w-full rounded-xl overflow-hidden border border-slate-800 relative bg-slate-950">
+                <iframe
+                  title="Radar Windy"
+                  src={`https://embed.windy.com/embed2.html?lat=${weatherData.lat}&lon=${weatherData.lon}&detailLat=${weatherData.lat}&detailLon=${weatherData.lon}&width=600&height=350&zoom=7&level=surface&overlay=rain&product=ecmwf&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1`}
+                  className="w-full h-full border-0"
+                  allow="geolocation"
+                />
+              </div>
+            </div>
+
+            <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+              <h3 className="text-sm font-semibold mb-2 flex items-center gap-2"><Bot className="w-4 h-4 text-cyan-400" /> Asystent Pogodowy AI</h3>
+              <div className="h-40 overflow-y-auto mb-3 flex flex-col gap-2 p-2 bg-slate-950/50 rounded-xl border border-slate-800 text-xs">
+                {chatMessages.map((msg, idx) => (
+                  <div key={idx} className={`p-2 rounded-lg max-w-[85%] ${msg.sender === 'user' ? 'bg-cyan-600 text-white self-end' : 'bg-slate-800 text-slate-200 self-start'}`}>
+                    {msg.text}
+                  </div>
+                ))}
+              </div>
+              <form onSubmit={handleChatSubmit} className="flex gap-2">
+                <input type="text" value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Zadaj pytanie (np. 'Jaka pogoda jutro o 18:00?')..." className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-100" />
+                <button type="submit" className="bg-cyan-600 p-2 rounded-xl text-xs hover:bg-cyan-500"><Send className="w-4 h-4" /></button>
+              </form>
+            </div>
+
+            <div className="bg-slate-900/40 p-4 rounded-2xl border border-slate-800 text-slate-300 space-y-3 mt-2">
+              <h3 className="text-base font-bold text-slate-100">O aplikacji Gemini Weather 3D</h3>
+              <p className="text-xs leading-relaxed">
+                Gemini Weather 3D to nowoczesna aplikacja internetowa dostarczająca precyzyjne prognozy pogody dla miast na całym świecie.
+              </p>
+            </div>
+          </>
+        )}
+      </main>
+    </div>
+  );
+}
+
